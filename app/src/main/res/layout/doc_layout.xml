@@ -7,6 +7,46 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+        <CheckBox
+            android:id="@+id/cb_fullscreen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:button="@null"
+            android:background="@drawable/selector_ic_fullscreen"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="10dp"/>
+        <TextView
+            android:id="@+id/tv_resize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="切换"
+            android:layout_toRightOf="@+id/cb_fullscreen"/>
+        <TextView
+            android:id="@+id/tv_width"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="宽："
+            android:layout_toRightOf="@+id/tv_resize"/>
+        <EditText
+            android:id="@+id/edt_doc_width"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="50dp"
+            android:text="500"
+            android:layout_toRightOf="@+id/tv_width"/>
+        <TextView
+            android:id="@+id/tv_height"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="高："
+            android:layout_toRightOf="@+id/edt_doc_width"/>
+        <EditText
+            android:id="@+id/edt_doc_height"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="50dp"
+            android:text="400"
+            android:layout_toRightOf="@+id/tv_height"/>
 
         <Switch
             android:id="@+id/switch_edit"
@@ -15,7 +55,7 @@
             android:layout_alignParentRight="true"
             android:checked="false"
             android:padding="10dp"
-            android:text="文档操作权限 : "
+            android:text="操作权限 : "
             android:textOff="关"
             android:textOn="开" />
     </RelativeLayout>
@@ -35,7 +75,8 @@
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rv_item_doc_tab"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            />
 
         <RelativeLayout
             android:id="@+id/ops_container"
@@ -156,7 +197,8 @@
                         android:id="@+id/rb_action_add"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="添加" />
+                        android:text="添加"
+                        android:checked="true"/>
 
                     <RadioButton
                         android:id="@+id/rb_action_modify"
@@ -204,7 +246,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:visibility="gone">
+                android:visibility="visible">
 
                 <TextView
                     android:layout_width="match_parent"
@@ -223,7 +265,8 @@
                         android:id="@+id/rb_path"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="画笔" />
+                        android:text="画笔"
+                        android:checked="true"/>
 
                     <RadioButton
                         android:id="@+id/rb_nite"

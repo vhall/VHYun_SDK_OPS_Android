@@ -2,7 +2,10 @@ package com.vhallyun.ops;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -10,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -67,6 +71,10 @@ public class DocActivity extends Activity {
     private TabAdapter tabAdapter;
     private LinearLayoutManager layoutManager;
     private List<String> idList = new ArrayList<>();
+
+    private CheckBox cbFullScreen;
+    private TextView tvResize;
+    private EditText edtWidth, edtHeight;
 
     private IDocument.DrawAction mAction = IDocument.DrawAction.ADD;
     private IDocument.DrawType mType = IDocument.DrawType.PATH;
@@ -148,10 +156,20 @@ public class DocActivity extends Activity {
             mDocView.addListener(eventListener);
             if (rl != null) {
                 rl.removeAllViews();
-                rl.addView(mDocView);
                 RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
                 params.addRule(RelativeLayout.CENTER_IN_PARENT);
-                mDocView.setLayoutParams(params);
+                //推荐使用方法会，能避免params 设置不生效引起的文档适配异常
+                rl.addView(mDocView, params);
+                new Handler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mDocument.isEditAble()) {
+                            mDocView.setEditable(true);
+                            mDocView.setAction(mAction);
+                            mDocView.setDrawType(mType);
+                        }
+                    }
+                });
             }
         }
     }
@@ -181,7 +199,12 @@ public class DocActivity extends Activity {
                         if (object.has("info")) {
                             JSONObject info = object.optJSONObject("info");
                             mPageView.setText("页数：" + (info.optInt("slideIndex") + 1) + "/" + info.optInt("slidesTotal"));
-                            mStepView.setText("步数：" + (info.optInt("stepIndex") + 1) + "/" + info.optInt("totalSteps"));
+                            int totalSteps = info.optInt("stepsTotal");
+                            if (totalSteps == 0) {
+                                mStepView.setText("步数：0/0");
+                            } else {
+                                mStepView.setText("步数：" + (info.optInt("stepIndex") + 1) + "/" + info.optInt("stepsTotal"));
+                            }
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -196,6 +219,18 @@ public class DocActivity extends Activity {
             }
         }
     };
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            mEditViewContainer.setVisibility(View.GONE);
+            mEditableView.setVisibility(View.GONE);
+        } else {
+            mEditableView.setVisibility(View.VISIBLE);
+            mEditViewContainer.setVisibility(mEditableView.isChecked() ? View.VISIBLE : View.INVISIBLE);
+        }
+    }
 
     private void initView() {
 //        mDocView = findViewById(R.id.opsview);//展示文档核心view
@@ -221,6 +256,32 @@ public class DocActivity extends Activity {
         recyclerView.setAdapter(tabAdapter);
         viewAdds = findViewById(R.id.rg_adds);
 
+        cbFullScreen = findViewById(R.id.cb_fullscreen);
+        tvResize = findViewById(R.id.tv_resize);
+        edtWidth = findViewById(R.id.edt_doc_width);
+        edtHeight = findViewById(R.id.edt_doc_height);
+
+        tvResize.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mDocument.getActiveView().getLayoutParams().width = Integer.valueOf(edtWidth.getText().toString());
+                mDocument.getActiveView().getLayoutParams().height = Integer.valueOf(edtHeight.getText().toString());
+
+                mDocument.getActiveView().setLayoutParams(mDocument.getActiveView().getLayoutParams());
+
+            }
+        });
+
+        cbFullScreen.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                } else {
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                }
+            }
+        });
 
         mDoodleActions.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
@@ -229,6 +290,10 @@ public class DocActivity extends Activity {
                     case R.id.rb_action_add:
                         mAction = IDocument.DrawAction.ADD;
                         mDoodleTypeContainer.setVisibility(View.VISIBLE);
+                        if (mDocView != null) {
+                            mDocView.setDrawType(mType);
+                            mDocView.setAction(mAction);
+                        }
                         break;
                     case R.id.rb_action_modify:
                         mAction = IDocument.DrawAction.MODIFY;
@@ -282,6 +347,10 @@ public class DocActivity extends Activity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 mDocument.setEditable(isChecked);
+                if (mDocView != null) {
+                    mDocView.setAction(IDocument.DrawAction.ADD);
+                    mDocView.setDrawType(IDocument.DrawType.PATH);
+                }
                 tabAdapter.setEditAble(isChecked);
                 mPageView.setVisibility(isChecked ? View.VISIBLE : View.INVISIBLE);
                 mEditViewContainer.setVisibility(isChecked ? View.VISIBLE : View.INVISIBLE);
@@ -322,12 +391,12 @@ public class DocActivity extends Activity {
                                 break;
                             case R.id.rb_add_board:
                                 if (!TextUtils.isEmpty(param)) {
-                                    if (param.length() != 7 && param.length() != 9) {
-                                        Toast.makeText(DocActivity.this, "not the normal color value!", Toast.LENGTH_SHORT).show();
+                                    if (param.length() == 7 || param.length() == 9) {
+                                        mDocument.addView(DOC_BOARD, param, 1280, 960);
                                         return;
                                     }
                                 }
-                                mDocument.addView(DOC_BOARD, param, 1280, 960);
+                                Toast.makeText(DocActivity.this, "not the normal color value!", Toast.LENGTH_SHORT).show();
                                 break;
                             default:
                                 break;
@@ -352,7 +421,6 @@ public class DocActivity extends Activity {
                 }
             }
         });
-
     }
 
 
@@ -395,6 +463,11 @@ public class DocActivity extends Activity {
 
     public void clickEventClear(View view) {
         mDocView.clear();
+        mDocView.setAction(mAction);
+        if (mAction == IDocument.DrawAction.ADD) {
+            mDocView.setDrawType(mType);
+        }
+
     }
 
     public void clickEventSetDoc(View view) {
