@@ -9,11 +9,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.vhall.document.DocumentView;
 import com.vhall.framework.VhallSDK;
 import com.vhall.framework.utils.SignatureUtil;
+import com.vhall.logmanager.L;
+import com.vhall.logmanager.LogReporter;
 
 import static android.Manifest.permission.READ_PHONE_STATE;
 
@@ -26,6 +30,8 @@ public class SplashActivity extends AppCompatActivity {
     private static final int REQUEST_READ_PHONE_STATE = 0;
     EditText mEditAppid;
     EditText mEditUserid;
+    EditText mEditDocUrl;
+    CheckBox checkBox;
     TextView tvPackageName, tvSignatures;
 
 
@@ -35,12 +41,14 @@ public class SplashActivity extends AppCompatActivity {
         setContentView(R.layout.splash_layout);
         mEditAppid = this.findViewById(R.id.et_appid);
         mEditUserid = this.findViewById(R.id.et_userid);
-        mEditAppid.setText("");
+        mEditDocUrl = this.findViewById(R.id.et_doc_url);
+        mEditAppid.setText("d317f559");//正式：d317f559   ceefadb5 test:b6d6f21a  359a05ea 正式yue：a3214366// vss f92b0393
         mEditUserid.setText(Build.MODEL);//String.valueOf(System.currentTimeMillis())
+        checkBox = findViewById(R.id.cb_env);
         tvPackageName = findViewById(R.id.tv_package_name);
         tvPackageName.setText(getPackageName());
         tvSignatures = findViewById(R.id.tv_signatures);
-        tvSignatures.setText(SignatureUtil.getSignatureSHA1(this));
+        tvSignatures.setText(SignatureUtil.getSignatureSHA1(this, SignatureUtil.getPackageName(this)));
         getPermission();
 
     }
@@ -69,7 +77,24 @@ public class SplashActivity extends AppCompatActivity {
         String userid = mEditUserid.getText().toString();
 
         if (!TextUtils.isEmpty(appid)) {
-            VhallSDK.getInstance().init(getApplicationContext(), appid, userid);//初始化成功会打印日志：初始化成功！，请确保注册的appid与当前应用包名签名一致
+            if (checkBox.isChecked()) {
+                //正式环境
+                VhallSDK.getInstance().init(getApplicationContext(), appid, userid);//初始化成功会打印日志：初始化成功！，请确保注册的appid与当前应用包名签名一致
+            } else {
+                VhallSDK.getInstance().setLogLevel(L.LogLevel.FULL);
+                //测试环境
+                VhallSDK.getInstance().init(getApplicationContext(), appid, userid, "t-open.e.vhall.com");//初始化成功会打印日志：初始化成功！，请确保注册的appid与当前应用包名签名一致
+//                DocumentView.setHost("https://t-static01-open.e.vhall.com/jssdk/doc-sdk/dist/dev/mobile.html");
+                if (TextUtils.isEmpty(mEditDocUrl.getText().toString())) {
+//                    DocumentView.setHost("https://t-static01-open.e.vhall.com/jssdk/doc-sdk/dist/dev/mobile1.1.9.html");
+                } else {
+                    DocumentView.setHost(mEditDocUrl.getText().toString());
+                }
+
+
+                LogReporter.getInstance().setDebug(true);
+
+            }
             Intent intent = new Intent(SplashActivity.this, MainActivity.class);
             startActivity(intent);
         }

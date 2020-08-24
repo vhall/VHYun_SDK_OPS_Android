@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.webkit.WebView;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -85,6 +86,8 @@ public class DocActivity extends Activity {
         mRoomId = getIntent().getStringExtra("roomId");//纯文档直播可不传
         mChannelId = getIntent().getStringExtra("channelId");
         mAccessToken = getIntent().getStringExtra("token");
+
+        WebView.setWebContentsDebuggingEnabled(true);
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.doc_layout);
@@ -160,7 +163,7 @@ public class DocActivity extends Activity {
                 params.addRule(RelativeLayout.CENTER_IN_PARENT);
                 //推荐使用方法会，能避免params 设置不生效引起的文档适配异常
                 rl.addView(mDocView, params);
-                new Handler().post(new Runnable() {
+                new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         if (mDocument.isEditAble()) {
@@ -169,7 +172,7 @@ public class DocActivity extends Activity {
                             mDocView.setDrawType(mType);
                         }
                     }
-                });
+                },300);
             }
         }
     }
