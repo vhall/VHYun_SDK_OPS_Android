@@ -26,12 +26,6 @@
         android:hint="doc基础地址"
         android:padding="5dp"/>
 
-    <CheckBox
-        android:id="@+id/cb_env"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="release" />
-
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -75,5 +69,20 @@
         android:layout_marginTop="50dp"
         android:onClick="enter"
         android:text="进入" />
+
+    <View
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        />
+    <TextView
+        android:id="@+id/version"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/app_name"
+        android:gravity="center_horizontal"
+        android:textSize="16sp"
+        android:layout_marginBottom="10dp"
+        />
 
 </LinearLayout>

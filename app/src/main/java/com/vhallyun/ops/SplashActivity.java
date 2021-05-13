@@ -31,8 +31,7 @@ public class SplashActivity extends AppCompatActivity {
     EditText mEditAppid;
     EditText mEditUserid;
     EditText mEditDocUrl;
-    CheckBox checkBox;
-    TextView tvPackageName, tvSignatures;
+    TextView tvPackageName, tvSignatures,version;
 
 
     @Override
@@ -42,15 +41,15 @@ public class SplashActivity extends AppCompatActivity {
         mEditAppid = this.findViewById(R.id.et_appid);
         mEditUserid = this.findViewById(R.id.et_userid);
         mEditDocUrl = this.findViewById(R.id.et_doc_url);
-        mEditAppid.setText("d317f559");//正式：d317f559   ceefadb5 test:b6d6f21a  359a05ea 正式yue：a3214366// vss f92b0393
+        version = findViewById(R.id.version);
         mEditUserid.setText(Build.MODEL);//String.valueOf(System.currentTimeMillis())
-        checkBox = findViewById(R.id.cb_env);
         tvPackageName = findViewById(R.id.tv_package_name);
         tvPackageName.setText(getPackageName());
         tvSignatures = findViewById(R.id.tv_signatures);
         tvSignatures.setText(SignatureUtil.getSignatureSHA1(this, SignatureUtil.getPackageName(this)));
         getPermission();
 
+        version.setText(String.format("version %s",BuildConfig.VERSION_NAME));
     }
 
     //初始化SDK需要读取手机信息做信息统计，如果取不到权限，信息为空，不影响SDK使用
@@ -77,24 +76,7 @@ public class SplashActivity extends AppCompatActivity {
         String userid = mEditUserid.getText().toString();
 
         if (!TextUtils.isEmpty(appid)) {
-            if (checkBox.isChecked()) {
-                //正式环境
-                VhallSDK.getInstance().init(getApplicationContext(), appid, userid);//初始化成功会打印日志：初始化成功！，请确保注册的appid与当前应用包名签名一致
-            } else {
-                VhallSDK.getInstance().setLogLevel(L.LogLevel.FULL);
-                //测试环境
-                VhallSDK.getInstance().init(getApplicationContext(), appid, userid, "t-open.e.vhall.com");//初始化成功会打印日志：初始化成功！，请确保注册的appid与当前应用包名签名一致
-//                DocumentView.setHost("https://t-static01-open.e.vhall.com/jssdk/doc-sdk/dist/dev/mobile.html");
-                if (TextUtils.isEmpty(mEditDocUrl.getText().toString())) {
-//                    DocumentView.setHost("https://t-static01-open.e.vhall.com/jssdk/doc-sdk/dist/dev/mobile1.1.9.html");
-                } else {
-                    DocumentView.setHost(mEditDocUrl.getText().toString());
-                }
-
-
-                LogReporter.getInstance().setDebug(true);
-
-            }
+            VhallSDK.getInstance().init(getApplicationContext(), appid, userid);//初始化成功会打印日志：初始化成功！，请确保注册的appid与当前应用包名签名一致
             Intent intent = new Intent(SplashActivity.this, MainActivity.class);
             startActivity(intent);
         }
