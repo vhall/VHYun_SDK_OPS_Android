@@ -7,7 +7,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 28
         versionCode 1
-        versionName "2.2.2"
+        versionName "2.2.3"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -30,6 +30,6 @@ dependencies {
     api 'io.socket:socket.io-client:1.0.0'
 
     //vhall ops sdk
-    api 'com.github.vhall.android.library:vhallyun-framework:2.3.4'
-    api 'com.github.vhall.android.library:vhallyun-ops:2.1.1'
+    api 'com.github.vhall.android.library:vhallyun-framework:2.3.5'
+    api 'com.github.vhall.android.library:vhallyun-ops:2.1.2'
 }
